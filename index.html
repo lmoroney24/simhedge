@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sim Hedge</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>Sim Hedge</h1>
+    <p class="tagline">Price protection for the cattle producers the enterprise brokerages won’t call back</p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <p class="intro">
+    USDA's Livestock Risk Protection (LRP) is subsidized insurance that pays you if cattle prices fall
+    below a price you lock in. It works for any herd size, even one head. Enter your herd and see which plan fits,
+    what it costs, and what it would have done in real past markets.
+  </p>
+
+  <!-- 1. Producer profile -->
+  <section class="card" id="profile">
+    <h2><span class="step">1</span> Your herd</h2>
+    <form id="herd-form" class="grid-form" autocomplete="off">
+      <label>Cattle
+        <select id="cattle-class">
+          <option value="steers">Steers</option>
+          <option value="heifers">Heifers</option>
+        </select>
+      </label>
+      <label>Number of head
+        <input id="head" type="number" min="1" max="6000" step="1" value="40">
+      </label>
+      <label>Expected sale weight (lbs per head)
+        <input id="weight" type="number" min="100" max="1000" step="10" value="750">
+      </label>
+      <label>Expected sale date
+        <input id="sale-date" type="date">
+      </label>
+      <label>Breakeven cost ($ per cwt)
+        <input id="breakeven" type="number" min="0" step="1" value="300">
+        <small>What it costs you to raise them, per 100 lbs. <em>Example value; use your own.</em></small>
+      </label>
+      <label>Local basis ($ per cwt)
+        <input id="basis" type="number" step="1" value="-5">
+        <small>Your sale barn price minus the national index. <em>Example value; use your own.</em></small>
+      </label>
+    </form>
+    <p id="profile-note" class="note"></p>
+  </section>
+
+  <!-- 2. Market data -->
+  <section class="card" id="market">
+    <h2><span class="step">2</span> The market today</h2>
+    <div id="market-summary" class="stat-row"></div>
+    <p id="match-note" class="note"></p>
+    <div class="table-scroll">
+      <table id="levels-table">
+        <caption>LRP choices for your herd. Click a row to try that plan below.</caption>
+        <thead>
+          <tr>
+            <th>Coverage level</th>
+            <th>Locked-in price</th>
+            <th>Your worst-case price</th>
+            <th>Your cost per head</th>
+            <th>Total cost</th>
+            <th>USDA pays</th>
+            <th>Covers breakeven?</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p id="futures-note" class="note"></p>
+    <p class="source" id="data-source"></p>
+  </section>
+
+  <!-- 3. Risk tolerance + recommendation -->
+  <section class="card" id="tolerance">
+    <h2><span class="step">3</span> What matters most to you?</h2>
+    <div class="choices" role="radiogroup">
+      <label class="choice">
+        <input type="radio" name="tolerance" value="cheapest" checked>
+        <span><strong>Cheapest plan that protects my breakeven</strong>
+        <small>Spend as little as possible while making sure a price drop can't push me below my costs.</small></span>
+      </label>
+      <label class="choice">
+        <input type="radio" name="tolerance" value="max">
+        <span><strong>Maximum protection</strong>
+        <small>Lock in the highest price available, whatever it costs.</small></span>
+      </label>
+      <label class="choice">
+        <input type="radio" name="tolerance" value="compare">
+        <span><strong>Show me everything</strong>
+        <small>No pick. Compare every coverage level side by side.</small></span>
+      </label>
+    </div>
+    <div id="recommendation" class="recommendation"></div>
+    <div id="breakdown" class="breakdown">
+      <h3>Plain-English breakdown</h3>
+      <div id="breakdown-text"></div>
+      <p class="fine">Written from the numbers on this page only. It is not a price prediction.</p>
+    </div>
+  </section>
+
+  <!-- 4. Scenario simulator -->
+  <section class="card" id="simulator">
+    <h2><span class="step">4</span> What if prices move?</h2>
+    <label class="slider-label" for="move">
+      Cattle prices by your sale date: <strong id="move-label"></strong>
+    </label>
+    <input id="move" type="range" min="-30" max="20" step="1" value="-15">
+    <div class="slider-scale"><span>-30%</span><span>no change</span><span>+20%</span></div>
+    <div id="sim-tiles" class="stat-row"></div>
+    <figure class="chart-box">
+      <figcaption>Profit or loss vs. your breakeven, across price outcomes</figcaption>
+      <div class="legend" id="sim-legend"></div>
+      <div class="chart" id="sim-chart"></div>
+    </figure>
+    <div class="table-scroll">
+      <table id="scenario-table">
+        <caption id="scenario-caption"></caption>
+        <thead>
+          <tr><th>Plan</th><th>Sale money</th><th>LRP payout</th><th>LRP cost</th><th>Profit vs. breakeven</th><th>vs. no coverage</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 5. History check -->
+  <section class="card" id="history">
+    <h2><span class="step">5</span> What would it have done before?</h2>
+    <p id="history-intro"></p>
+    <div id="history-headline" class="headline"></div>
+    <div id="history-tiles" class="stat-row"></div>
+    <figure class="chart-box">
+      <figcaption>LRP payout minus cost for your herd, by month the plan was bought</figcaption>
+      <div class="legend" id="history-legend"></div>
+      <div class="chart" id="history-chart"></div>
+    </figure>
+    <details>
+      <summary>See every month as a table</summary>
+      <div class="table-scroll">
+        <table id="history-table">
+          <thead>
+            <tr><th>Bought</th><th>Ended</th><th>Locked-in price</th><th>Actual price</th><th>Payout</th><th>Cost</th><th>Net</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+
+  <!-- 6. Limitations -->
+  <section class="card limits" id="limits">
+    <h2>Know the limits</h2>
+    <ul>
+      <li><strong>Educational decision support, not investment advice.</strong> Sim Hedge is not a licensed broker or insurance agent. LRP is bought through an approved livestock insurance agent.</li>
+      <li><strong>Basis risk.</strong> LRP pays on the national CME Feeder Cattle Index, not your local sale barn. If your local price falls more than the index, LRP won't cover the difference. The basis you enter is an assumption.</li>
+      <li><strong>Prices and rates change daily.</strong> The numbers shown are USDA's for the date listed. What you can buy tomorrow will differ.</li>
+      <li><strong>Timing.</strong> LRP pays on its end date, which may not match your sale date exactly.</li>
+      <li><strong>History check simplifications.</strong> Past results use USDA's real published prices for Steers 600-1,000 lbs, scaled by USDA's price adjustment factor for other cattle types, and assume your herd size and weight. Past results don't predict future ones.</li>
+      <li><strong>Premiums</strong> are billed at the end of coverage. Head limits and other policy rules apply; check with an agent.</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="wrap footer">
+  Sim Hedge &middot; FinTech @ Rocky Top, Fall 2026 &middot; Build 1<br>
+  Header photo: cattle grazing in Fillmore County, Minnesota. Public domain, via Wikimedia Commons.
+</footer>
+
+<div id="tooltip" class="tooltip" hidden></div>
+
+<script src="data/lrp-data.js"></script>
+<script src="calc.js"></script>
+<script src="charts.js"></script>
+<script src="app.js"></script>
+<script src="reveal.js"></script>
+</body>
+</html>
