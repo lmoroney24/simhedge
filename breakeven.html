@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sim Hedge · Breakeven</title>
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="fonts/PlayfairDisplay.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/Oswald.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css?v=8855f78">
+</head>
+<body>
+
+<header class="hero hero-sm">
+  <nav class="site-nav">
+    <a class="brand" href="index.html" aria-label="Sim Hedge home"><svg viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M28 15c-5-4-15-3-15 4s14 7 14 14-11 9-16 4"/><path d="M36 14v25M52 14v25M36 26.5h16"/><path d="M9 48q23 12 46 0"/></g></svg><span>Sim Hedge</span></a>
+    <a href="index.html">Home</a>
+    <a href="breakeven.html" aria-current="page">Breakeven</a>
+    <a href="lrp.html">LRP tool</a>
+    <a href="inventory.html">Inventory</a>
+    <a href="coverage.html">My coverage</a>
+  </nav>
+  <div class="wrap">
+    <h1>Breakeven</h1>
+    <p class="tagline">What it costs to raise your cattle, per hundredweight</p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <p class="intro">
+    Your breakeven is the sale price per cwt that covers everything it took to raise your cattle.
+    Sim Hedge uses it to judge every LRP plan.
+  </p>
+
+  <!-- 1. Cattle -->
+  <section class="card" id="b-cattle">
+    <h2><span class="step">1</span> Your cattle</h2>
+    <form id="b-form" class="grid-form" autocomplete="off">
+      <label>Cattle
+        <select id="b-class">
+          <optgroup label="Feeder cattle (100–1,000 lbs)">
+            <option value="steers">Feeder steers</option>
+            <option value="heifers">Feeder heifers</option>
+          </optgroup>
+          <optgroup label="Fat cattle (1,000–1,800 lbs)">
+            <option value="fat">Fat cattle (fed steers &amp; heifers)</option>
+          </optgroup>
+        </select>
+      </label>
+      <label>Number of head
+        <input id="b-head" type="number" min="1" max="6000" step="1" value="40">
+      </label>
+      <label>Expected sale weight (lbs per head)
+        <input id="b-weight" type="number" min="100" max="1000" step="10" value="550">
+        <small id="b-weight-hint">Feeder cattle: 100–1,000 lbs.</small>
+      </label>
+      <label>Expected sale date
+        <input id="b-date" type="date">
+      </label>
+    </form>
+  </section>
+
+  <!-- 2. Costs -->
+  <section class="card" id="b-costs">
+    <h2><span class="step">2</span> All-in costs</h2>
+    <p class="note">Count everything it takes to raise them, including your own labor. Leave a line blank if it doesn't apply.</p>
+    <div class="form-actions b-top">
+      <div class="unit-toggle" id="b-per" role="group" aria-label="Enter costs">
+        <span>Enter costs</span>
+        <button type="button" data-per="head" aria-pressed="true">Per head</button>
+        <button type="button" data-per="total" aria-pressed="false">For the whole group</button>
+      </div>
+      <button type="button" class="btn btn-small btn-quiet" id="b-example">Load example values</button>
+      <button type="button" class="btn btn-small btn-quiet" id="b-clear">Clear</button>
+    </div>
+    <p id="b-example-note" class="fine" hidden>Example values for a 40-head cow-calf herd. Replace them with your own.</p>
+
+    <form id="b-cost-form" class="grid-form b-costs" autocomplete="off">
+        <label>Purchase price
+          <input id="c-purchase" type="number" min="0" step="1" placeholder="0" data-cost>
+          <small>Only if you bought them.</small>
+        </label>
+        <label>Cow herd costs per calf
+          <input id="c-cow" type="number" min="0" step="1" placeholder="0" data-cost>
+          <small>Only for calves you raised. <button type="button" class="link" id="cow-help-btn">Help me figure this</button></small>
+        </label>
+        <label>Feed, hay & supplements
+          <input id="c-feed" type="number" min="0" step="1" placeholder="0" data-cost>
+        </label>
+        <label>Pasture or grazing rent
+          <input id="c-pasture" type="number" min="0" step="1" placeholder="0" data-cost>
+        </label>
+        <label>Vet & medicine
+          <input id="c-vet" type="number" min="0" step="1" placeholder="0" data-cost>
+        </label>
+        <label>Labor
+          <input id="c-labor" type="number" min="0" step="1" placeholder="0" data-cost>
+          <small>Include your own time.</small>
+        </label>
+        <label>Fuel, repairs & equipment
+          <input id="c-equip" type="number" min="0" step="1" placeholder="0" data-cost>
+        </label>
+        <label>Marketing
+          <input id="c-market" type="number" min="0" step="1" placeholder="0" data-cost>
+          <small>Sale commission, trucking, checkoff.</small>
+        </label>
+        <label>Other
+          <input id="c-other" type="number" min="0" step="1" placeholder="0" data-cost>
+        </label>
+    </form>
+
+    <div id="cow-help" class="be-calc" hidden>
+      <p class="be-def"><strong>Cow herd costs per calf:</strong> what it costs to keep a cow for a year, divided over the calves you actually wean.</p>
+      <label>Yearly cost per cow ($)
+        <input id="cow-cost" type="number" min="0" step="1" placeholder="0">
+        <small>Feed, hay, pasture, vet, bull, and cow replacement.</small>
+      </label>
+      <label>Calves weaned per 100 cows
+        <input id="cow-weaned" type="number" min="1" max="120" step="1" value="85">
+      </label>
+      <p class="be-result" id="cow-result"></p>
+    </div>
+
+    <div class="grid-form b-extra">
+      <label>Interest rate (%)
+        <input id="b-rate" type="number" min="0" max="30" step="0.25" value="8">
+        <small>Your operating loan rate.</small>
+      </label>
+      <label>Months you own them
+        <input id="b-months" type="number" min="0" max="36" step="1" value="7">
+      </label>
+      <label>Death loss (%)
+        <input id="b-death" type="number" min="0" max="50" step="0.5" value="1">
+        <small>Costs are spread over the head you actually sell.</small>
+      </label>
+    </div>
+    <div class="form-actions calc-row">
+      <button type="button" class="btn" id="b-calc">Calculate breakeven</button>
+    </div>
+  </section>
+
+  <!-- 3. Result -->
+  <section class="card" id="b-result">
+    <h2><span class="step">3</span> Your breakeven</h2>
+    <div id="b-empty" class="note">Enter your costs above, then press <strong>Calculate breakeven</strong>.</div>
+    <div id="b-out" hidden>
+      <p id="b-stale" class="note warn" hidden>You changed your inputs. Press <strong>Calculate breakeven</strong> to update this result.</p>
+      <div id="b-tiles" class="stat-row"></div>
+      <div class="table-scroll">
+        <table id="b-table">
+          <caption>Where the money goes</caption>
+          <thead><tr><th>Cost</th><th>Per head sold</th><th>Per cwt</th><th>Share</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="b-target">
+        <label for="b-profit">Profit you want ($ per head)</label>
+        <input id="b-profit" type="number" step="1" value="100">
+        <p id="b-target-line"></p>
+      </div>
+      <p id="b-market" class="index-callout"></p>
+      <div class="form-actions">
+        <button type="button" class="btn" id="b-use">Use this breakeven in the LRP tool</button>
+      </div>
+
+      <div class="b-lots">
+        <h3>Save this breakeven to a lot</h3>
+        <div class="lot-pick" id="b-existing" hidden>
+          <label>Existing lot
+            <select id="b-lot-select"></select>
+          </label>
+          <button type="button" class="btn" id="b-lot-update">Save to this lot</button>
+        </div>
+        <div class="lot-pick">
+          <label>New lot name
+            <input id="b-lot-name" type="text" maxlength="40" placeholder="e.g. Fall steers">
+          </label>
+          <button type="button" class="btn" id="b-lot-new">Create new lot</button>
+        </div>
+        <p id="b-lot-msg" class="lot-msg" hidden></p>
+        <p class="fine">A new lot uses the cattle, head count, weight and sale date from step 1. Saving to an existing lot changes only its breakeven. Lots are saved in this browser and show up on your <a href="inventory.html">Inventory</a>.</p>
+      </div>
+    </div>
+    <p class="fine">Sale weight is your expected weight when you sell. Interest counts the purchase price for the whole time and other costs for half the time, since they're spent gradually.</p>
+  </section>
+
+</main>
+
+<footer class="wrap footer">
+  Sim Hedge &middot; FinTech @ Rocky Top, Fall 2026 &middot; Educational decision support, not investment advice.<br>
+  Header photo: cattle grazing in Fillmore County, Minnesota. Public domain, via Wikimedia Commons.
+</footer>
+
+<script src="data/lrp-data.js"></script>
+<script src="calc.js?v=8855f78"></script>
+<script src="lots.js?v=8855f78"></script>
+<script src="breakeven.js?v=8855f78"></script>
+<script src="reveal.js?v=8855f78"></script>
+</body>
+</html>

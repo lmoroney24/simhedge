@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sim Hedge · My coverage</title>
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="fonts/PlayfairDisplay.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/Oswald.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css?v=8855f78">
+</head>
+<body>
+
+<div class="demo-banner" role="note">
+  <strong>Demo:</strong> sample data. Sim Hedge isn't licensed to sell insurance yet, so nothing here is a real policy.
+</div>
+
+<header class="hero hero-sm">
+  <nav class="site-nav">
+    <a class="brand" href="index.html" aria-label="Sim Hedge home"><svg viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M28 15c-5-4-15-3-15 4s14 7 14 14-11 9-16 4"/><path d="M36 14v25M52 14v25M36 26.5h16"/><path d="M9 48q23 12 46 0"/></g></svg><span>Sim Hedge</span></a>
+    <a href="index.html">Home</a>
+    <a href="breakeven.html">Breakeven</a>
+    <a href="lrp.html">LRP tool</a>
+    <a href="inventory.html">Inventory</a>
+    <a href="coverage.html" aria-current="page">My coverage</a>
+  </nav>
+  <div class="wrap">
+    <h1>My coverage</h1>
+    <p class="tagline">Viewing: demo account (Example Farm)</p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <p class="intro">
+    Once Sim Hedge is licensed, this is where you'd keep track of the LRP coverage you buy through us:
+    what's covered, what you owe, and what to do and when.
+  </p>
+
+  <!-- Empty state -->
+  <section class="card" id="empty" hidden>
+    <h2>No coverage to show yet</h2>
+    <p>
+      This page lists lots that have LRP coverage, the dates that matter (when you can sell, when the premium is billed,
+      and the deadline to file a claim), and how today's market compares to your price floor.
+    </p>
+    <div class="form-actions">
+      <button type="button" class="btn" id="load-demo">Load demo coverage</button>
+      <a class="btn btn-quiet" href="inventory.html">Go to my inventory</a>
+    </div>
+    <p class="fine" id="load-demo-note"></p>
+  </section>
+
+  <div id="dashboard" hidden>
+
+    <!-- 1. Policy summary -->
+    <section class="card" id="policy">
+      <h2><span class="step">1</span> Policy summary</h2>
+      <dl class="policy-facts">
+        <div><dt>LRP policy</dt><dd><span class="badge">Demo</span></dd></div>
+        <div><dt>Insurance company</dt><dd>Your insurance company <span class="fine">(issues the real policy)</span></dd></div>
+        <div><dt>Agent</dt><dd>Sim Hedge <span class="fine">(coming soon, once licensed)</span></dd></div>
+      </dl>
+      <div id="policy-tiles" class="stat-row"></div>
+      <button type="button" class="link" id="reset-demo">Reset demo scenario</button>
+    </section>
+
+    <!-- 2. Covered lots -->
+    <section class="card" id="covered">
+      <h2><span class="step">2</span> Covered lots</h2>
+      <div id="covered-list" class="cover-list"></div>
+    </section>
+
+    <!-- 3. Key dates -->
+    <section class="card" id="dates">
+      <h2><span class="step">3</span> Key dates</h2>
+      <ol id="date-list" class="timeline"></ol>
+      <p class="fine">
+        Sell window: you must still own the cattle during the last 60 days of coverage, or LRP won't pay and the premium
+        isn't refunded. Claim deadline: file a Notice of Probable Loss with your agent within 60 days after coverage ends
+        (Missouri Extension G459). Confirm with your agent.
+      </p>
+    </section>
+
+    <!-- 4. Not covered yet -->
+    <section class="card" id="planned">
+      <h2><span class="step">4</span> Lots without coverage</h2>
+      <div id="planned-list"></div>
+      <p id="buy-message" class="buy-message" hidden role="status"></p>
+    </section>
+
+    <!-- 5. Paperwork -->
+    <section class="card">
+      <h2><span class="step">5</span> Ownership records</h2>
+      <p>If LRP pays, you may need to prove you owned the cattle during the last 60 days of coverage: settlement sheets,
+        bills of sale, brand inspections, or vet records in your name. Coming with accounts: upload them here so they're
+        ready if you need to file a claim.</p>
+      <div class="form-actions">
+        <a class="btn" href="inventory.html">Add coverage for a lot</a>
+      </div>
+    </section>
+
+  </div>
+
+</main>
+
+<footer class="wrap footer">
+  Sim Hedge &middot; FinTech @ Rocky Top, Fall 2026 &middot; Demo page: sample data, not a real policy.
+  Educational decision support, not investment advice.<br>
+  Header photo: cattle grazing in Fillmore County, Minnesota. Public domain, via Wikimedia Commons.
+</footer>
+
+<script src="data/lrp-data.js"></script>
+<script src="calc.js?v=8855f78"></script>
+<script src="lots.js?v=8855f78"></script>
+<script src="coverage.js?v=8855f78"></script>
+<script src="reveal.js?v=8855f78"></script>
+</body>
+</html>

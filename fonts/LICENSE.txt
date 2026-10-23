@@ -1,0 +1,6 @@
+Fonts in this folder:
+- Playfair Display, Copyright 2017 The Playfair Display Project Authors (https://github.com/clauseggers/Playfair)
+- Oswald, Copyright 2016 The Oswald Project Authors (https://github.com/googlefonts/OswaldFont)
+
+Both are licensed under the SIL Open Font License, Version 1.1: https://openfontlicense.org
+Downloaded from Google Fonts (latin subset, variable weight).

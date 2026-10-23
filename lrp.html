@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sim Hedge · LRP tool</title>
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="fonts/PlayfairDisplay.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/Oswald.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css?v=8855f78">
+</head>
+<body>
+
+<header class="hero">
+  <nav class="site-nav">
+    <a class="brand" href="index.html" aria-label="Sim Hedge home"><svg viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M28 15c-5-4-15-3-15 4s14 7 14 14-11 9-16 4"/><path d="M36 14v25M52 14v25M36 26.5h16"/><path d="M9 48q23 12 46 0"/></g></svg><span>Sim Hedge</span></a>
+    <a href="index.html">Home</a>
+    <a href="breakeven.html">Breakeven</a>
+    <a href="lrp.html" aria-current="page">LRP tool</a>
+    <a href="inventory.html">Inventory</a>
+    <a href="coverage.html">My coverage</a>
+  </nav>
+  <div class="wrap">
+    <h1>Sim Hedge</h1>
+    <p class="tagline">Price protection for the cattle producers the enterprise brokerages won’t call back</p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <p class="intro">
+    LRP is USDA-subsidized insurance that pays if cattle prices fall below the price you lock in.
+    Any herd size, even one head.
+  </p>
+
+  <!-- Shown when a lot is opened from the inventory page -->
+  <div id="lot-banner" class="lot-banner" hidden></div>
+
+  <!-- 1. Producer profile -->
+  <section class="card" id="profile">
+    <h2><span class="step">1</span> Your herd</h2>
+    <form id="herd-form" class="grid-form" autocomplete="off">
+      <label>Cattle
+        <select id="cattle-class">
+          <optgroup label="Feeder cattle (100–1,000 lbs)">
+            <option value="steers">Feeder steers</option>
+            <option value="heifers">Feeder heifers</option>
+          </optgroup>
+          <optgroup label="Fat cattle (1,000–1,800 lbs)">
+            <option value="fat">Fat cattle (fed steers &amp; heifers)</option>
+          </optgroup>
+        </select>
+      </label>
+      <label>Number of head
+        <input id="head" type="number" min="1" max="6000" step="1" value="40">
+      </label>
+      <label>Expected sale weight (lbs per head)
+        <input id="weight" type="number" min="100" max="1000" step="10" value="750">
+        <small id="weight-hint">Feeder cattle: 100–1,000 lbs.</small>
+      </label>
+      <label>Expected sale date
+        <input id="sale-date" type="date">
+      </label>
+      <label>Breakeven cost ($ per cwt)
+        <input id="breakeven" type="number" min="0" step="1" value="300">
+        <small id="breakeven-help">What it costs you to raise them, per 100 lbs. <em>Example value; use your own.</em>
+          <a href="breakeven.html">Calculate yours →</a></small>
+      </label>
+    </form>
+    <p id="profile-note" class="note"></p>
+    <div class="lot-pick">
+      <label>Lot name
+        <input id="lot-name" type="text" maxlength="40" placeholder="e.g. Fall steers">
+      </label>
+      <button type="button" class="btn" id="lot-save-btn">Add lot</button>
+    </div>
+    <p id="lot-save-msg" class="lot-msg" hidden></p>
+    <p class="fine">Adding a lot saves these cattle to your <a href="inventory.html">Inventory</a>, in this browser only.</p>
+  </section>
+
+  <!-- 2. Market data -->
+  <section class="card" id="market">
+    <h2><span class="step">2</span> The market today</h2>
+    <div class="unit-toggle" role="group" aria-label="Show money as">
+      <span>Show money as</span>
+      <button type="button" data-unit="total" aria-pressed="true">Total</button>
+      <button type="button" data-unit="head" aria-pressed="false">$/head</button>
+      <button type="button" data-unit="cwt" aria-pressed="false">$/cwt</button>
+    </div>
+    <div id="index-callout" class="index-callout"></div>
+    <div id="market-summary" class="stat-row"></div>
+    <div class="lengths">
+      <div id="length-row" class="length-row" role="group" aria-label="LRP plan lengths on sale today"></div>
+      <div class="legend len-legend">
+        <span class="mark ok">✓ Coverage lines up with your sale</span>
+        <span class="mark early">✗ Sale too early: LRP won't pay</span>
+        <span class="mark after">◷ Ends 3+ weeks before your sale</span>
+      </div>
+      <p id="length-explain" class="note"></p>
+      <details>
+        <summary>Why this length?</summary>
+        <div id="length-why"></div>
+      </details>
+    </div>
+    <p id="match-note" class="note"></p>
+    <div class="table-scroll">
+      <table id="levels-table">
+        <caption>LRP choices for your herd. Click a row to try that plan below.</caption>
+        <thead>
+          <tr>
+            <th>Coverage level</th>
+            <th>Locked-in price</th>
+            <th>Your worst-case price</th>
+            <th id="cost-col">Your cost (total)</th>
+            <th>USDA pays</th>
+            <th>Covers breakeven?</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p id="futures-note" class="note"></p>
+    <p class="source" id="data-source"></p>
+  </section>
+
+  <!-- 3. Risk tolerance + recommendation -->
+  <section class="card" id="tolerance">
+    <h2><span class="step">3</span> What matters most to you?</h2>
+    <div class="choices" role="radiogroup">
+      <label class="choice">
+        <input type="radio" name="tolerance" value="cheapest" checked>
+        <span><strong>Cheapest plan that protects my breakeven</strong>
+        <small>Spend as little as possible while making sure a price drop can't push me below my costs.</small></span>
+      </label>
+      <label class="choice">
+        <input type="radio" name="tolerance" value="max">
+        <span><strong>Maximum protection</strong>
+        <small>Lock in the highest price available, whatever it costs.</small></span>
+      </label>
+      <label class="choice">
+        <input type="radio" name="tolerance" value="compare">
+        <span><strong>Compare all plans</strong></span>
+      </label>
+    </div>
+    <div class="budget-row">
+      <label for="budget">Most I can spend on coverage <span class="fine">($ per head, optional)</span></label>
+      <input id="budget" type="number" min="0" step="1" placeholder="No limit">
+    </div>
+    <div id="recommendation" class="recommendation"></div>
+    <figure class="chart-box">
+      <figcaption>Protection vs. cost: every coverage level</figcaption>
+      <p class="fine">Higher and further left is better: more protection for less money. Click a dot to try that plan.</p>
+      <div class="chart" id="tradeoff-chart"></div>
+    </figure>
+    <div id="breakdown" class="breakdown">
+      <h3>Breakdown</h3>
+      <div id="breakdown-text"></div>
+      <p class="fine">Written from the numbers on this page only. It is not a price prediction.</p>
+    </div>
+  </section>
+
+  <!-- 4. Scenario simulator -->
+  <section class="card" id="simulator">
+    <h2><span class="step">4</span> What if prices move?</h2>
+    <div class="unit-toggle" role="group" aria-label="Show money as">
+      <span>Show money as</span>
+      <button type="button" data-unit="total" aria-pressed="true">Total</button>
+      <button type="button" data-unit="head" aria-pressed="false">$/head</button>
+      <button type="button" data-unit="cwt" aria-pressed="false">$/cwt</button>
+    </div>
+    <div class="level-picker">
+      <span class="picker-label">Coverage level</span>
+      <button type="button" class="btn btn-small btn-quiet" id="level-prev" aria-label="Lower coverage">‹</button>
+      <div id="level-chips" class="level-chips" role="group" aria-label="Coverage levels"></div>
+      <button type="button" class="btn btn-small btn-quiet" id="level-next" aria-label="Higher coverage">›</button>
+    </div>
+    <label class="slider-label" for="move">
+      Cattle prices by your sale date: <strong id="move-label"></strong>
+    </label>
+    <input id="move" type="range" min="-30" max="20" step="1" value="-15">
+    <div class="slider-scale"><span>-30%</span><span>no change</span><span>+20%</span></div>
+    <div id="sim-tiles" class="stat-row"></div>
+    <figure class="chart-box">
+      <figcaption>Profit or loss vs. breakeven, for each change in cattle price</figcaption>
+      <div class="legend" id="sim-legend"></div>
+      <div class="chart" id="sim-chart"></div>
+    </figure>
+    <div class="table-scroll">
+      <table id="scenario-table">
+        <caption id="scenario-caption"></caption>
+        <thead>
+          <tr><th>Plan</th><th>Sale money</th><th>LRP payout</th><th>LRP cost</th><th>Profit vs. breakeven</th><th>vs. no coverage</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 5. Limitations -->
+  <section class="card limits" id="limits">
+    <h2>Know the limits</h2>
+    <ul>
+      <li><strong>Educational decision support, not investment advice.</strong> Sim Hedge is not a licensed broker or insurance agent. LRP is bought through an approved livestock insurance agent.</li>
+      <li><strong>Basis risk.</strong> LRP pays on a national CME index (the Feeder Cattle Index for feeder cattle, the Live Cattle Index for fat cattle), not your local sale barn. If your local price falls more than the index, LRP won't cover the difference.</li>
+      <li><strong>Prices and rates change daily.</strong> The numbers shown are USDA's for the date listed. What you can buy tomorrow will differ.</li>
+      <li><strong>Timing.</strong> LRP pays on its end date, which may not match your sale date exactly.</li>
+      <li><strong>Premiums</strong> are billed at the end of coverage. Head limits and other policy rules apply; check with an agent.</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="wrap footer">
+  Sim Hedge &middot; FinTech @ Rocky Top, Fall 2026 &middot; Build 1<br>
+  Header photo: cattle grazing in Fillmore County, Minnesota. Public domain, via Wikimedia Commons.
+</footer>
+
+<div id="tooltip" class="tooltip" hidden></div>
+
+<script src="data/lrp-data.js"></script>
+<script src="calc.js?v=8855f78"></script>
+<script src="lots.js?v=8855f78"></script>
+<script src="charts.js?v=8855f78"></script>
+<script src="app.js?v=8855f78"></script>
+<script src="reveal.js?v=8855f78"></script>
+</body>
+</html>

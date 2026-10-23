@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sim Hedge · Inventory</title>
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="fonts/PlayfairDisplay.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/Oswald.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css?v=8855f78">
+</head>
+<body>
+
+<header class="hero hero-sm">
+  <nav class="site-nav">
+    <a class="brand" href="index.html" aria-label="Sim Hedge home"><svg viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M28 15c-5-4-15-3-15 4s14 7 14 14-11 9-16 4"/><path d="M36 14v25M52 14v25M36 26.5h16"/><path d="M9 48q23 12 46 0"/></g></svg><span>Sim Hedge</span></a>
+    <a href="index.html">Home</a>
+    <a href="breakeven.html">Breakeven</a>
+    <a href="lrp.html">LRP tool</a>
+    <a href="inventory.html" aria-current="page">Inventory</a>
+    <a href="coverage.html">My coverage</a>
+  </nav>
+  <div class="wrap">
+    <h1>Sim Hedge</h1>
+    <p class="tagline">Price protection for the cattle producers the enterprise brokerages won’t call back</p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <p class="intro">
+    Your protection inventory: the cattle you plan to sell this year, grouped into lots, and how much of their value
+    has a price floor. One lot = one LRP plan.
+  </p>
+
+  <!-- 1. Summary -->
+  <section class="card" id="summary">
+    <h2><span class="step">1</span> Your year at a glance</h2>
+    <div id="summary-headline" class="headline"></div>
+    <div id="summary-tiles" class="stat-row"></div>
+    <div id="protect-bar" class="protect-bar" hidden>
+      <div class="bar-track"><div class="bar-fill" id="protect-fill"></div></div>
+      <div class="legend">
+        <span class="box" style="--c:var(--series-lrp)">Has a price floor</span>
+        <span class="box" style="--c:var(--line)">No price floor</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Lots -->
+  <section class="card" id="lots">
+    <h2><span class="step">2</span> Your lots</h2>
+    <p class="note">
+      A <strong>lot</strong> is a group of similar cattle sold together. Make a separate lot whenever the
+      <strong>type</strong> (feeder steers, feeder heifers, or fat cattle), <strong>weight class</strong> (feeder: under 600 lbs or 600 to 1,000 lbs),
+      or <strong>sale date</strong> is different. Each lot gets its own LRP plan.
+    </p>
+
+    <div id="empty-state" class="empty" hidden>
+      <p>No lots yet. Add your first lot below, or load an example farm to see how it works. You can also add lots from the <a href="lrp.html">LRP tool</a> or the <a href="breakeven.html">Breakeven</a> page.</p>
+      <button type="button" class="btn" id="load-example">Load example farm</button>
+    </div>
+
+    <div class="table-scroll" id="lots-wrap">
+      <table id="lots-table">
+        <thead>
+          <tr>
+            <th>Lot</th><th>Head</th><th>Sale weight</th><th>Sale date</th><th>Insured</th>
+            <th>Value today</th><th>Coverage</th><th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div id="lot-warnings"></div>
+
+    <form id="lot-form" class="lot-form" autocomplete="off">
+      <h3 id="form-title">Add a lot</h3>
+      <div class="grid-form">
+        <label>Lot name
+          <input id="f-name" type="text" maxlength="40" placeholder="e.g. Fall steers" required>
+        </label>
+        <label>Cattle
+          <select id="f-class">
+            <optgroup label="Feeder cattle (100–1,000 lbs)">
+              <option value="steers">Feeder steers</option>
+              <option value="heifers">Feeder heifers</option>
+            </optgroup>
+            <optgroup label="Fat cattle (1,000–1,800 lbs)">
+              <option value="fat">Fat cattle (fed steers &amp; heifers)</option>
+            </optgroup>
+          </select>
+        </label>
+        <label>Number of head
+          <input id="f-head" type="number" min="1" max="6000" step="1" value="20" required>
+        </label>
+        <label>Expected sale weight (lbs per head)
+          <input id="f-weight" type="number" min="100" max="1000" step="10" value="550" required>
+          <small><span id="f-weight-hint">Feeder cattle: 100–1,000 lbs.</span> LRP insures the weight at sale, not today's weight.</small>
+        </label>
+        <label>Expected sale date
+          <input id="f-date" type="date" required>
+        </label>
+        <label>Breakeven ($ per cwt)
+          <input id="f-breakeven" type="number" min="0" step="1" value="290">
+        </label>
+      </div>
+      <label class="check">
+        <input id="f-keep" type="checkbox">
+        Keeping these as replacements (not selling). LRP never covers breeding stock.
+      </label>
+      <div class="form-actions">
+        <button type="submit" class="btn" id="f-submit">Add lot</button>
+        <button type="button" class="btn btn-quiet" id="f-cancel" hidden>Cancel</button>
+      </div>
+    </form>
+    <p class="fine" id="storage-note">
+      Your lots are saved in this browser only. They don't leave this device and nobody else can see them,
+      but they'll disappear if you clear your browser data.
+    </p>
+  </section>
+
+  <!-- 3. How LRP pays -->
+  <section class="card" id="how-it-pays">
+    <h2><span class="step">3</span> How LRP pays on a lot</h2>
+    <p>
+      LRP pays on one national price at the end of your coverage: the <strong>CME Feeder Cattle Index</strong>
+      for feeder cattle, or the <strong>CME Live Cattle Index</strong> for fat cattle. What your cattle actually
+      sell for doesn't change the payout. <em>Example:</em> a lot of 18 steers at 550 lbs is 99 cwt
+      insured, with a $308 floor:
+    </p>
+    <div class="table-scroll">
+      <table class="example-table">
+        <thead><tr><th>Index ends at</th><th>LRP pays</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>$300</td><td>$792</td><td>($308 − $300) × 99 cwt</td></tr>
+          <tr><td>$295</td><td>$1,287</td><td>($308 − $295) × 99 cwt</td></tr>
+          <tr><td>$310</td><td>$0</td><td>Index above the floor, even if your local sale was only $300</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">That last row is <strong>basis risk</strong>: your sale barn and the national index don't always move together.</p>
+  </section>
+
+  <!-- 4. After coverage ends -->
+  <section class="card" id="after-sale">
+    <h2><span class="step">4</span> After your LRP expires</h2>
+    <p class="standout">You don't have to sell when coverage ends.</p>
+    <ul class="check-list">
+      <li><strong>Feeder cattle: sell them or keep them.</strong> You can keep growing them after coverage ends. LRP pays
+        on the index on the end date either way, as long as you owned the cattle during the last 60 days of coverage.</li>
+      <li><strong>Fat cattle: plan to sell them.</strong> They're already finished, so unlike feeder cattle you can't keep
+        growing them into a heavier class. Holding them longer just adds feed cost.</li>
+    </ul>
+
+    <h3>Keep proof you owned them</h3>
+    <p>If LRP pays, the insurance company can ask you to prove you owned the cattle during the last 60 days.
+      Records that usually work:</p>
+    <ul class="doc-list">
+      <li>Sale barn settlement sheets or sale receipts</li>
+      <li>Bills of sale or purchase receipts</li>
+      <li>Brand inspection certificates (in states that brand-inspect)</li>
+      <li>Vet, vaccination, or health records in your name</li>
+      <li>Ear tag or RFID records</li>
+      <li>Feedlot or custom-feeding invoices, for cattle on feed</li>
+    </ul>
+    <p class="fine">Ask your agent which records they accept.</p>
+
+    <h3>Set up ownership with your agent before you buy</h3>
+    <p>The name on your LRP application has to match who owns the cattle: you, your spouse, a partnership, or an LLC.
+      If someone else owns a share, that has to be listed too. <strong>Don't lose a payment because the application
+      wasn't filled out right or ownership records are missing.</strong></p>
+
+    <h3>If the index ended below your floor</h3>
+    <p>File a claim (a Notice of Probable Loss) with your agent within 60 days after coverage ends. The insurance
+      company usually pays within about 30 days.</p>
+
+    <h3>The premium isn't due until the end</h3>
+    <p>You don't pay for LRP when you buy it. The premium is billed after coverage ends, so that money stays in your
+      account, or off your operating loan, the whole time. <em>Example:</em> a $1,700 premium billed 21 weeks after you
+      buy, at an 8% operating-loan rate, is about $55 of interest you don't pay.</p>
+    <p id="interest-line" class="note" hidden></p>
+    <p class="fine">Confirm claim deadlines, ownership rules, and billing with your agent. Rules can change each year.</p>
+  </section>
+
+</main>
+
+<footer class="wrap footer">
+  Sim Hedge &middot; FinTech @ Rocky Top, Fall 2026 &middot; Educational decision support, not investment advice.<br>
+  Header photo: cattle grazing in Fillmore County, Minnesota. Public domain, via Wikimedia Commons.
+</footer>
+
+<script src="data/lrp-data.js"></script>
+<script src="calc.js?v=8855f78"></script>
+<script src="lots.js?v=8855f78"></script>
+<script src="inventory.js?v=8855f78"></script>
+<script src="reveal.js?v=8855f78"></script>
+</body>
+</html>
